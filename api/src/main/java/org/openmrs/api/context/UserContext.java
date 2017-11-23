@@ -25,6 +25,7 @@ import org.openmrs.api.db.ContextDAO;
 import org.openmrs.util.LocaleUtility;
 import org.openmrs.util.OpenmrsConstants;
 import org.openmrs.util.RoleConstants;
+import org.openmrs.util.Security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,13 +95,17 @@ public class UserContext implements Serializable {
 	 */
 	public User authenticate(String username, String password, ContextDAO contextDAO) throws ContextAuthenticationException {
 		if (log.isDebugEnabled()) {
-			log.debug("Authenticating with username: " + username);
+			// Before authenticating a user do not log username
+			// There might sensitive information like password mistakenly
+			// entered in username field.
+			log.debug("Authenticating using username");
 		}
 		
 		this.user = contextDAO.authenticate(username, password);
 		setUserLocation();
 		if (log.isDebugEnabled()) {
-			log.debug("Authenticated as: " + this.user);
+			// Encrypt username while logging username.
+			log.debug("Authenticated as: " + Security.encrypt(this.user.getUsername()));
 		}
 		
 		return this.user;
